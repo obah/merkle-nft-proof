@@ -34,3 +34,5 @@ fs.createReadStream("./lib/eligibleAccounts.csv")
   .on("error", (err) => {
     console.error("Error reading 'airdrop.csv':", err);
   });
+
+//merkle root: 0xce3dd3f5d99df66074b463d2fca6ca74556d2fe05551f1391319778c6556dae2
