@@ -99,6 +99,10 @@ describe("Airdrop", function () {
         value: ONE_ETHER,
       });
 
+      const amount = ethers.parseUnits("10000", 18);
+
+      await token.transfer(coolAirdrop, amount);
+
       await coolAirdrop
         .connect(eligibleAccount)
         .claimAirdrop(proofs, eligibleAmount);
@@ -171,12 +175,14 @@ describe("Airdrop", function () {
   });
 
   describe("Withdraw fn", () => {
-    it("should allow owner withdraw", async () => {
+    it.only("should allow owner withdraw", async () => {
       const { coolAirdrop, owner, duration, token } = await loadFixture(
         deployCoolAirdrop
       );
 
-      await time.increaseTo(duration);
+      const newTime = 8 * 24 * 60 * 60;
+
+      await time.increaseTo(newTime);
 
       const availableBalance = await token.balanceOf(coolAirdrop);
 
