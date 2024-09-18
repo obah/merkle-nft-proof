@@ -175,7 +175,7 @@ describe("Airdrop", function () {
   });
 
   describe("Withdraw fn", () => {
-    it.only("should allow owner withdraw", async () => {
+    it("should allow owner withdraw", async () => {
       const { coolAirdrop, owner, duration, token } = await loadFixture(
         deployCoolAirdrop
       );
