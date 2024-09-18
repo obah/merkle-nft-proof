@@ -1,4 +1,7 @@
-import { loadFixture } from "@nomicfoundation/hardhat-toolbox/network-helpers";
+import {
+  loadFixture,
+  time,
+} from "@nomicfoundation/hardhat-toolbox/network-helpers";
 import { expect } from "chai";
 import hre, { ethers } from "hardhat";
 
@@ -30,8 +33,10 @@ describe("Airdrop", function () {
     ];
 
     const ONE_ETHER = ethers.parseEther("1");
+    const ONE_WEEK_IN_SECS = 7 * 24 * 60 * 60;
 
-    const duration = 360; //5 minutes
+    const duration = (await time.latest()) + ONE_WEEK_IN_SECS;
+
     const { token } = await loadFixture(deployCoolToken);
 
     const coolAirdrop = await coolAirdropFactory.deploy(
@@ -50,6 +55,7 @@ describe("Airdrop", function () {
       eligibleAccount,
       ONE_ETHER,
       eligibleAmount,
+      duration,
     };
   }
 
@@ -111,14 +117,105 @@ describe("Airdrop", function () {
       ).to.be.revertedWithCustomError(coolAirdrop, "NotAnNFTHolder");
     });
 
-    it("should only give airdrop to an account once", async () => {});
+    it("should only give airdrop to an account once", async () => {
+      const {
+        coolAirdrop,
+        owner,
+        ONE_ETHER,
+        eligibleAccount,
+        proofs,
+        eligibleAmount,
+      } = await loadFixture(deployCoolAirdrop);
 
-    it("should not give airdrop after duration has ended", async () => {});
+      await owner.sendTransaction({
+        to: eligibleAccount,
+        value: ONE_ETHER,
+      });
+
+      await coolAirdrop
+        .connect(eligibleAccount)
+        .claimAirdrop(proofs, eligibleAmount);
+
+      await expect(
+        await coolAirdrop
+          .connect(eligibleAccount)
+          .claimAirdrop(proofs, eligibleAmount)
+      ).to.be.revertedWithCustomError(coolAirdrop, "UserClaimed");
+    });
+
+    it("should not give airdrop after duration has ended", async () => {
+      const {
+        coolAirdrop,
+        owner,
+        ONE_ETHER,
+        eligibleAccount,
+        proofs,
+        eligibleAmount,
+      } = await loadFixture(deployCoolAirdrop);
+
+      await owner.sendTransaction({
+        to: eligibleAccount,
+        value: ONE_ETHER,
+      });
+
+      const EIGHT_DAYS_IN_SECS = 8 * 24 * 60 * 60;
+
+      await time.increaseTo(EIGHT_DAYS_IN_SECS);
+
+      await expect(
+        coolAirdrop
+          .connect(eligibleAccount)
+          .claimAirdrop(proofs, eligibleAmount)
+      ).to.be.revertedWithCustomError(coolAirdrop, "AirdropEnded");
+    });
   });
 
   describe("Withdraw fn", () => {
-    it("should allow owner withdraw", async () => {});
+    it("should allow owner withdraw", async () => {
+      const { coolAirdrop, owner, duration, token } = await loadFixture(
+        deployCoolAirdrop
+      );
 
-    it("should not allow other accounts withdraw", async () => {});
+      await time.increaseTo(duration);
+
+      const availableBalance = await token.balanceOf(coolAirdrop);
+
+      await token.approve(owner, availableBalance);
+      await coolAirdrop.withdraw(owner);
+
+      expect(await token.balanceOf(owner)).to.greaterThanOrEqual(
+        availableBalance
+      );
+    });
+
+    it("should not allow other accounts withdraw", async () => {
+      const { coolAirdrop, owner, duration, otherUser, token } =
+        await loadFixture(deployCoolAirdrop);
+
+      await time.increaseTo(duration);
+
+      const availableBalance = await token.balanceOf(coolAirdrop);
+
+      await token.approve(otherUser, availableBalance);
+
+      await expect(
+        coolAirdrop.connect(otherUser).withdraw(owner)
+      ).to.be.revertedWithCustomError(coolAirdrop, "OnlyOwner");
+    });
+
+    it("should not allow withdrawal before airdrop ends", async () => {
+      const { coolAirdrop, owner, token } = await loadFixture(
+        deployCoolAirdrop
+      );
+
+      const availableBalance = await token.balanceOf(coolAirdrop);
+
+      await token.approve(owner, availableBalance);
+
+      await expect(coolAirdrop.withdraw(owner)).to.be.revertedWithCustomError(
+        coolAirdrop,
+        "AirdropActive"
+      );
+    });
   });
 });
