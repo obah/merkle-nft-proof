@@ -1,7 +1,4 @@
-import {
-  impersonateAccount,
-  loadFixture,
-} from "@nomicfoundation/hardhat-toolbox/network-helpers";
+import { loadFixture } from "@nomicfoundation/hardhat-toolbox/network-helpers";
 import { expect } from "chai";
 import hre, { ethers } from "hardhat";
 
@@ -111,7 +108,7 @@ describe("Airdrop", function () {
 
       await expect(
         coolAirdrop.connect(otherUser).claimAirdrop(proofs, eligibleAmount)
-      ).to.be.revertedWithCustomError;
+      ).to.be.revertedWithCustomError(coolAirdrop, "NotAnNFTHolder");
     });
 
     it("should only give airdrop to an account once", async () => {});
