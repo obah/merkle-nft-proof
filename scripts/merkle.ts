@@ -1,11 +1,12 @@
 import { StandardMerkleTree } from "@openzeppelin/merkle-tree";
 import fs from "fs";
 import csv from "csv-parser";
+import { IProofs, IRow } from "../types";
 
-const values: any = [];
+const values: string[][] = [];
 fs.createReadStream("./lib/eligibleAccounts.csv")
   .pipe(csv())
-  .on("data", (row: { address: string; amount: string }) => {
+  .on("data", (row: IRow) => {
     values.push([row.address, row.amount]);
   })
   .on("end", () => {
@@ -14,14 +15,15 @@ fs.createReadStream("./lib/eligibleAccounts.csv")
 
     fs.writeFileSync("tree.json", JSON.stringify(tree.dump()));
 
-    const proofs = {};
+    // const proofs = {};
+    const proofs: IProofs = {};
 
     try {
       const loadedTree = StandardMerkleTree.load(
         JSON.parse(fs.readFileSync("tree.json", "utf8"))
       );
       for (const [i, v] of loadedTree.entries()) {
-        const proof: any = loadedTree.getProof(i);
+        const proof: string[] = loadedTree.getProof(i);
         proofs[v[0]] = proof;
       }
 
