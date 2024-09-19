@@ -10,10 +10,10 @@ CoolAirdrop implements the process of checking wallet addresses for validity in 
 
 ### [CoolAirdrop.sol](https://github.com/obah/merkle-nft-proof/blob/main/contracts/CoolAirdrop.sol)
 
-The `MerkleAirdrop` contract facilitates a token airdrop using the Merkle Tree proof system to verify eligible participants, while checking if they own a BAYC NFT. The contract distributes a predefined amount of tokens to eligible users who can claim the airdrop, provided they haven't claimed the aidrop already and meet the criteria based on the Merkle proof.
+The `CoolAirdrop` contract facilitates a token airdrop using the Merkle Tree proof system to verify eligible participants, while checking if they own a BAYC NFT. The contract distributes a predefined amount of tokens to eligible users who can claim the airdrop, provided they haven't claimed the aidrop already and meet the criteria based on the Merkle proof.
 
-- Deployed address (Lisk Testnet): 0x72cC33dAE4b7433D025Eb34Ff51EbC986a997c56
-- [Lisk Sepolia Blockscout verification link](https://sepolia-blockscout.lisk.com/address/0x72cC33dAE4b7433D025Eb34Ff51EbC986a997c56#code)
+- Deployed address (Lisk Testnet): 0xCe4d6fD0d1a070846fEE153cf2613c870dD71e69
+- [Lisk Sepolia Blockscout verification link](https://sepolia-blockscout.lisk.com/address/0xCe4d6fD0d1a070846fEE153cf2613c870dD71e69#code)
 
 Key features:
 
@@ -37,8 +37,8 @@ Functions:
 
 This is the ERC20 token powering the airdrop, with an initial supply of 2,000,000 tokens.
 
-- Deployed address (Lisk testnet): 0x7EC98659b285e5071030bF4Fbe2Cf5fE05EEb65D
-- [Lisk Sepolia Blockscout verification link](https://sepolia-blockscout.lisk.com/address/0x7EC98659b285e5071030bF4Fbe2Cf5fE05EEb65D#code)
+- Deployed address (Lisk testnet): 0x0B25AbD0136f6Ed5C220604Ec27026522515194f
+- [Lisk Sepolia Blockscout verification link](https://sepolia-blockscout.lisk.com/address/0x0B25AbD0136f6Ed5C220604Ec27026522515194f#code)
 
 ## Setup and Installation
 
