@@ -15,7 +15,6 @@ fs.createReadStream("./lib/eligibleAccounts.csv")
 
     fs.writeFileSync("tree.json", JSON.stringify(tree.dump()));
 
-    // const proofs = {};
     const proofs: IProofs = {};
 
     try {

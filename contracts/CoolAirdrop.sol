@@ -14,6 +14,7 @@ contract CoolAirdrop {
     error AirdropActive();
     error AirdropExhausted();
     error NotAnNFTHolder();
+    error NFTAlreadyVerified();
 
     event AirdropClaimed(address indexed account, uint time, uint256 amount);
 
@@ -28,6 +29,7 @@ contract CoolAirdrop {
     address public immutable OWNER;
 
     mapping(address => bool) claimedAddresses;
+    mapping(uint256 => bool) claimedNFTs;
 
     constructor(address _tokenAddress, bytes32 _merkleRoot, uint _duration) {
         if (_tokenAddress == address(0)) revert ZeroAddress();
@@ -42,17 +44,20 @@ contract CoolAirdrop {
 
     function claimAirdrop(
         bytes32[] memory _merkleProof,
-        uint256 _amount
+        uint256 _amount,
+        uint256 _tokenId
     ) external {
         if (msg.sender == address(0)) revert ZeroAddress();
         if (NFT.balanceOf(msg.sender) < 1) revert NotAnNFTHolder();
         if (claimedAddresses[msg.sender] == true) revert UserClaimed();
+        if (claimedNFTs[_tokenId]) revert NFTAlreadyVerified();
         if (block.timestamp >= ENDDATE) revert AirdropEnded();
         if (balance == 0) revert AirdropExhausted();
 
         verifyProof(_merkleProof, _amount, msg.sender);
 
         claimedAddresses[msg.sender] = true;
+        claimedNFTs[_tokenId] = true;
         balance = balance - _amount;
 
         TOKEN.transfer(msg.sender, _amount);

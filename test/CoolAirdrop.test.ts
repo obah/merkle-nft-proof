@@ -26,6 +26,7 @@ describe("Airdrop", function () {
     const eligibleAccount = await ethers.getImpersonatedSigner(
       "0xfF53e1Da7b67ae676d7742f858Aab5bd4Bc937F6"
     );
+    const nftId = 3949;
     const eligibleAmount = 400;
     const proofs = [
       "0x84b15609d6cc2fe2d59981b7f127387a06be760e467a2d61b3af5e0b67308bd6",
@@ -56,6 +57,7 @@ describe("Airdrop", function () {
       ONE_ETHER,
       eligibleAmount,
       duration,
+      nftId,
     };
   }
 
@@ -92,6 +94,7 @@ describe("Airdrop", function () {
         eligibleAccount,
         proofs,
         eligibleAmount,
+        nftId,
       } = await loadFixture(deployCoolAirdrop);
 
       await owner.sendTransaction({
@@ -105,7 +108,7 @@ describe("Airdrop", function () {
 
       await coolAirdrop
         .connect(eligibleAccount)
-        .claimAirdrop(proofs, eligibleAmount);
+        .claimAirdrop(proofs, eligibleAmount, nftId);
 
       expect(await token.balanceOf(eligibleAccount)).to.greaterThanOrEqual(
         eligibleAmount
@@ -117,7 +120,7 @@ describe("Airdrop", function () {
         await loadFixture(deployCoolAirdrop);
 
       await expect(
-        coolAirdrop.connect(otherUser).claimAirdrop(proofs, eligibleAmount)
+        coolAirdrop.connect(otherUser).claimAirdrop(proofs, eligibleAmount, 1)
       ).to.be.revertedWithCustomError(coolAirdrop, "NotAnNFTHolder");
     });
 
@@ -129,6 +132,8 @@ describe("Airdrop", function () {
         eligibleAccount,
         proofs,
         eligibleAmount,
+        nftId,
+        token,
       } = await loadFixture(deployCoolAirdrop);
 
       await owner.sendTransaction({
@@ -136,14 +141,18 @@ describe("Airdrop", function () {
         value: ONE_ETHER,
       });
 
+      const amount = ethers.parseUnits("10000", 18);
+
+      await token.transfer(coolAirdrop, amount);
+
       await coolAirdrop
         .connect(eligibleAccount)
-        .claimAirdrop(proofs, eligibleAmount);
+        .claimAirdrop(proofs, eligibleAmount, nftId);
 
       await expect(
-        await coolAirdrop
+        coolAirdrop
           .connect(eligibleAccount)
-          .claimAirdrop(proofs, eligibleAmount)
+          .claimAirdrop(proofs, eligibleAmount, nftId)
       ).to.be.revertedWithCustomError(coolAirdrop, "UserClaimed");
     });
 
@@ -169,7 +178,7 @@ describe("Airdrop", function () {
       await expect(
         coolAirdrop
           .connect(eligibleAccount)
-          .claimAirdrop(proofs, eligibleAmount)
+          .claimAirdrop(proofs, eligibleAmount, 1)
       ).to.be.revertedWithCustomError(coolAirdrop, "AirdropEnded");
     });
   });
